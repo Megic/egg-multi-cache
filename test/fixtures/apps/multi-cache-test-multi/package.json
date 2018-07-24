@@ -1,0 +1,7 @@
+{
+  "name": "multi-cache-test-multi",
+  "version": "0.0.1",
+  "dependencies": {
+    "cache-manager-ioredis": "^1.0.1"
+  }
+}

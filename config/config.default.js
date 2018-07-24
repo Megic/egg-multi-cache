@@ -7,18 +7,6 @@
  */
 module.exports = {
   cache: {
-    client: {
-      store: 'memory',
-      max: 100,
-      ttl: 0,
-    },
-    // clients: {
-    //   memory: {
-    //     store: 'memory',
-    //     max: 100,
-    //     ttl: 0,
-    //   },
-    // },
     default: {
     },
   },

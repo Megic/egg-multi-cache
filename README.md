@@ -20,9 +20,19 @@
 [download-image]: https://img.shields.io/npm/dm/egg-multi-cache.svg?style=flat-square
 [download-url]: https://npmjs.org/package/egg-multi-cache
 
-<!--
-Description here.
--->
+node-cache-manager features a built-in memory cache (using node-lru-cache), with the standard functions you'd expect in most caches:
+`
+set(key, val, {ttl: ttl}) // * see note below
+wrap(key, function, {ttl: ttl}) 
+get(key)
+del(key)
+
+// * Note that depending on the underlying store, you may be able to pass the
+// ttl as the third param, like this:
+set(key, val, ttl)
+// ... or pass no ttl at all:
+set(key, val)`
+
 
 ## Install
 
@@ -56,7 +66,7 @@ see [config/config.default.js](config/config.default.js) for more detail.
 
 ## Questions & Suggestions
 
-Please open an issue [here](https://github.com/eggjs/egg/issues).
+Please open an issue [here](https://github.com/relzhong/egg-multi-cache/issues).
 
 ## License
 

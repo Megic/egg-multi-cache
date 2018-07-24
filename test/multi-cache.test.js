@@ -36,7 +36,7 @@ describe('test/cache.test.js', () => {
   });
 
   it('should cannot get value after expired', async () => {
-    await app.cache.set('foo', 'bar', 1); // expires after 1 second
+    await app.cache.set('foo', 'bar', { ttl: 1 }); // expires after 1 second
     const value = await app.cache.get('foo');
 
     assert(value === 'bar');
@@ -47,25 +47,12 @@ describe('test/cache.test.js', () => {
       }, 1500);
     });
 
-    assert(nullValue === null);
+    assert(!nullValue);
   });
 
-  it('should cached when cache is set', async () => {
-    await app.cache.set('foo', 'bar');
-    const has = await app.cache.has('foo');
-
-    assert(has === true);
-  });
-
-  it('should not cached when cache is not set', async () => {
-    await app.cache.del('foo');
-    const has = await app.cache.has('foo');
-
-    assert(has === false);
-  });
 
   it('should return default value when there is no cache', async () => {
-    const value = await app.cache.get('foo', 'default');
+    const value = await app.cache.wrap('foo', 'default');
 
     assert(value === 'default');
 
@@ -74,7 +61,7 @@ describe('test/cache.test.js', () => {
   });
 
   it('should return and set default value when defaultValue is callable', async () => {
-    let value = await app.cache.get('foo', () => {
+    let value = await app.cache.wrap('foo', () => {
       return 'bar';
     });
 
@@ -89,7 +76,7 @@ describe('test/cache.test.js', () => {
   });
 
   it('should return/set default value when defaultValue is async callable', async () => {
-    let value = await app.cache.get('foo', () => {
+    let value = await app.cache.wrap('foo', () => {
       return new Promise(resolve => {
         setTimeout(() => {
           resolve('bar');
@@ -112,11 +99,15 @@ describe('test/cache.test.js', () => {
 
     value = await app.cache.get('foo');
 
-    assert(value === null);
+    assert(!value);
   });
 
   it('should return the custom store', async () => {
-    const config = app.config.cache.stores.memory;
+    const app = mock.app({
+      baseDir: 'apps/multi-cache-test-multi',
+    });
+    await app.ready();
+    const config = app.config.cache.clients.memory;
 
     mock(manager, 'caching', options => {
       assert(options.store === 'memory');
@@ -124,19 +115,17 @@ describe('test/cache.test.js', () => {
       assert(options.max === config.max);
     });
 
-    await app.cache.store('memory');
+    await app.cache.get('memory').set('foo', 'bar');
+    assert(await app.cache.get('memory').get('foo') === 'bar');
   });
 
-  it('should throw error when store not support', async () => {
-    let hasError = false;
-    try {
-      await app.cache.store('air');
-    } catch (error) {
-      hasError = true;
-      assert(/not\ssupport/.test(error.message));
-    }
-
-    assert(hasError);
+  it('should return multi store', async () => {
+    const app = mock.app({
+      baseDir: 'apps/multi-cache-test-multi',
+    });
+    await app.ready();
+    await app.cache.get('memredis').set('foo', 'bar');
+    assert(await app.cache.get('memredis').get('foo') === 'bar');
   });
 
   it('should clear the cache', async () => {
@@ -160,7 +149,7 @@ describe('test/cache.test.js', () => {
       app.cache.get('bar'),
     ]);
 
-    assert(foo === null);
-    assert(bar === null);
+    assert(!foo);
+    assert(!bar);
   });
 });
